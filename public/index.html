@@ -1,33 +1,169 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-<meta name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="theme-color" content="#9bcbd8">
-<title>Lagos Legends</title>
-<link rel="stylesheet" href="/css/style.css">
-<script type="importmap">
-{
-    "imports": {
-        "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js"
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <meta name="theme-color" content="#9bcbd8">
+
+    <title>Lagos Legends</title>
+
+    <link rel="stylesheet" href="/css/style.css">
+
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js"
+        }
     }
-}
-</script>
+    </script>
 </head>
+
 <body>
-<div id="game-container"></div>
-<div id="game-ui">
-    <h2>LAGOS LEGENDS</h2>
-    <p>THE CITY IS YOURS.</p>
-    <span id="coordinates">Initialising...</span>
-</div>
-<div id="joystick">
-    <div id="joystick-knob"></div>
-</div>
-<div id="controls-hint">
-    WASD / ARROW KEYS
-</div>
-<script type="module" src="/js/main.js"></script>
+
+    <div id="game-container"></div>
+
+    <div id="game-ui">
+
+        <h2>LAGOS LEGENDS</h2>
+
+        <p>THE CITY IS YOURS.</p>
+
+        <span id="coordinates">Initialising...</span>
+
+        <button id="customise-button">
+            CUSTOMISE CHARACTER
+        </button>
+
+    </div>
+
+
+    <div id="character-panel">
+
+        <div class="panel-header">
+
+            <div>
+                <h2>CHARACTER CREATOR</h2>
+                <p>Build your own identity.</p>
+            </div>
+
+            <button id="close-panel">×</button>
+
+        </div>
+
+
+        <div class="custom-section">
+
+            <label>SKIN TONE</label>
+
+            <select id="skin-select">
+                <option value="0">Light Brown</option>
+                <option value="1" selected>Brown</option>
+                <option value="2">Dark Brown</option>
+                <option value="3">Deep Brown</option>
+            </select>
+
+        </div>
+
+
+        <div class="custom-section">
+
+            <label>HAIRSTYLE</label>
+
+            <select id="hairstyle-select">
+                <option value="0">Low Cut</option>
+                <option value="1">Afro</option>
+                <option value="2">Short Hair</option>
+                <option value="3">Bald</option>
+            </select>
+
+        </div>
+
+
+        <div class="custom-section">
+
+            <label>HAIR COLOUR</label>
+
+            <select id="hair-select">
+                <option value="0">Black</option>
+                <option value="1">Dark Brown</option>
+                <option value="2">Blonde</option>
+            </select>
+
+        </div>
+
+
+        <div class="custom-section">
+
+            <label>TOP</label>
+
+            <select id="top-select">
+                <option value="0">Blue Hoodie</option>
+                <option value="1">Black Shirt</option>
+                <option value="2">White Shirt</option>
+                <option value="3">Red Jacket</option>
+                <option value="4">Green Shirt</option>
+            </select>
+
+        </div>
+
+
+        <div class="custom-section">
+
+            <label>TROUSERS</label>
+
+            <select id="trousers-select">
+                <option value="0">Black</option>
+                <option value="1">Blue Jeans</option>
+                <option value="2">Grey</option>
+                <option value="3">Cream</option>
+            </select>
+
+        </div>
+
+
+        <div class="custom-section">
+
+            <label>SHOES</label>
+
+            <select id="shoes-select">
+                <option value="0">Black</option>
+                <option value="1">White</option>
+                <option value="2">Red</option>
+            </select>
+
+        </div>
+
+
+        <div class="panel-actions">
+
+            <button id="randomise-button">
+                RANDOMISE
+            </button>
+
+            <button id="reset-button">
+                RESET
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <div id="joystick">
+        <div id="joystick-knob"></div>
+    </div>
+
+
+    <div id="controls-hint">
+        WASD / ARROW KEYS
+    </div>
+
+
+    <script type="module" src="/js/main.js"></script>
+
 </body>
 </html>
