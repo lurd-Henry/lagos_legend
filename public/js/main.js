@@ -1,5 +1,11 @@
 import * as THREE from "three";
 
+import {
+    createCharacter,
+    updateCharacter,
+    appearanceOptions
+} from "./character.js";
+
 // ==========================================
 // LAGOS LEGENDS - STAGE 2
 // MODULAR CHARACTER SYSTEM
