@@ -2,21 +2,30 @@ import * as THREE from "three";
 
 import {
     createCharacter,
-    updateCharacter,
-    appearanceOptions
+    updateCharacter
 } from "./character.js";
 
+
 // ==========================================
-// LAGOS LEGENDS - STAGE 2
-// MODULAR CHARACTER SYSTEM
+// LAGOS LEGENDS - STAGE 2.2 + 2.3
 // ==========================================
 
+
+// HTML ELEMENTS
+
 const container = document.getElementById("game-container");
+const coordinates = document.getElementById("coordinates");
+
+
+// ==========================================
+// SCENE
+// ==========================================
 
 const scene = new THREE.Scene();
 
 scene.background = new THREE.Color(0x9bcbd8);
 scene.fog = new THREE.Fog(0x9bcbd8, 35, 100);
+
 
 const camera = new THREE.PerspectiveCamera(
     65,
@@ -25,13 +34,20 @@ const camera = new THREE.PerspectiveCamera(
     200
 );
 
+
 const renderer = new THREE.WebGLRenderer({
     antialias: false,
     powerPreference: "high-performance"
 });
 
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
-renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(
+    Math.min(window.devicePixelRatio, 1.5)
+);
+
+renderer.setSize(
+    window.innerWidth,
+    window.innerHeight
+);
 
 container.appendChild(renderer.domElement);
 
@@ -41,10 +57,17 @@ container.appendChild(renderer.domElement);
 // ==========================================
 
 scene.add(
-    new THREE.HemisphereLight(0xffffff, 0x777766, 2)
+    new THREE.HemisphereLight(
+        0xffffff,
+        0x777766,
+        2
+    )
 );
 
-const sunlight = new THREE.DirectionalLight(0xffffff, 2);
+const sunlight = new THREE.DirectionalLight(
+    0xffffff,
+    2
+);
 
 sunlight.position.set(20, 30, 15);
 
@@ -96,7 +119,9 @@ for (let z = -45; z <= 45; z += 10) {
 }
 
 
+// ==========================================
 // BUILDINGS
+// ==========================================
 
 function createBuilding(x, z, width, height, color) {
 
@@ -114,6 +139,7 @@ function createBuilding(x, z, width, height, color) {
     scene.add(building);
 }
 
+
 createBuilding(-12, -15, 9, 8, 0xd8b48a);
 createBuilding(-12, 0, 9, 11, 0xb87e55);
 createBuilding(-12, 15, 9, 7, 0xd6c59c);
@@ -124,48 +150,31 @@ createBuilding(12, 15, 9, 12, 0xb98a66);
 
 
 // ==========================================
-// CHARACTER CUSTOMISATION CONFIGURATION
-// ==========================================
-
-const characterSettings = {
-
-    skinTone: 0x986747,
-
-    outfit: 0x2454a6,
-
-    trousers: 0x252b38,
-
-    shoes: 0x171717,
-
-    hair: 0x17110e
-
-};
-
-
-// ==========================================
-// CHARACTER BUILDER
-// ==========================================
-// ==========================================
-// PLAYER CHARACTER
+// PLAYER
 // ==========================================
 
 const player = createCharacter();
 
 scene.add(player);
 
+
 // ==========================================
-// CHARACTER CUSTOMISATION UI
+// CHARACTER CUSTOMISATION
 // ==========================================
 
 const panel = document.getElementById("character-panel");
 
-document.getElementById("customise-button").onclick = () => {
-    panel.classList.add("open");
-};
+const customiseButton = document.getElementById("customise-button");
+const closeButton = document.getElementById("close-panel");
 
-document.getElementById("close-panel").onclick = () => {
+
+customiseButton.addEventListener("click", () => {
+    panel.classList.add("open");
+});
+
+closeButton.addEventListener("click", () => {
     panel.classList.remove("open");
-};
+});
 
 
 const selectors = {
@@ -179,6 +188,8 @@ const selectors = {
 
 };
 
+
+// CHANGE APPEARANCE
 
 Object.entries(selectors).forEach(([property, id]) => {
 
@@ -195,282 +206,60 @@ Object.entries(selectors).forEach(([property, id]) => {
 });
 
 
-document.getElementById("randomise-button").onclick = () => {
+// RANDOMISE
 
-    const randomAppearance = {};
+document.getElementById("randomise-button").addEventListener(
+    "click",
+    () => {
 
-    Object.entries(selectors).forEach(([property, id]) => {
+        const randomAppearance = {};
 
-        const element = document.getElementById(id);
+        Object.entries(selectors).forEach(([property, id]) => {
 
-        const max = element.options.length;
+            const element = document.getElementById(id);
 
-        const value = Math.floor(Math.random() * max);
+            const value = Math.floor(
+                Math.random() * element.options.length
+            );
 
-        element.value = value;
+            element.value = value;
 
-        randomAppearance[property] = value;
-
-    });
-
-    updateCharacter(player, randomAppearance);
-
-};
-
-
-document.getElementById("reset-button").onclick = () => {
-
-    const defaults = {
-        skin: 1,
-        hairstyle: 0,
-        hair: 0,
-        top: 0,
-        trousers: 0,
-        shoes: 0
-    };
-
-    Object.entries(selectors).forEach(([property, id]) => {
-
-        document.getElementById(id).value = defaults[property];
-
-    });
-
-    updateCharacter(player, defaults);
-
-};
-    const character = new THREE.Group();
-
-    const skinMaterial = new THREE.MeshStandardMaterial({
-        color: appearance.skinTone,
-        flatShading: true
-    });
-
-    const outfitMaterial = new THREE.MeshStandardMaterial({
-        color: appearance.outfit,
-        flatShading: true
-    });
-
-    const trousersMaterial = new THREE.MeshStandardMaterial({
-        color: appearance.trousers,
-        flatShading: true
-    });
-
-    const shoeMaterial = new THREE.MeshStandardMaterial({
-        color: appearance.shoes,
-        flatShading: true
-    });
-
-    const hairMaterial = new THREE.MeshStandardMaterial({
-        color: appearance.hair,
-        flatShading: true
-    });
-
-
-    function makePart(geometry, material, parent, position) {
-
-        const mesh = new THREE.Mesh(geometry, material);
-
-        mesh.position.set(...position);
-
-        parent.add(mesh);
-
-        return mesh;
-    }
-
-
-    // TORSO
-
-    const torso = makePart(
-        new THREE.CapsuleGeometry(0.38, 0.65, 3, 7),
-        outfitMaterial,
-        character,
-        [0, 1.25, 0]
-    );
-
-
-    // NECK
-
-    makePart(
-        new THREE.CylinderGeometry(0.12, 0.14, 0.2, 6),
-        skinMaterial,
-        character,
-        [0, 1.77, 0]
-    );
-
-
-    // HEAD
-
-    const headGroup = new THREE.Group();
-
-    headGroup.position.y = 1.95;
-
-    character.add(headGroup);
-
-    makePart(
-        new THREE.IcosahedronGeometry(0.34, 1),
-        skinMaterial,
-        headGroup,
-        [0, 0, 0]
-    );
-
-
-    // HAIR
-
-    makePart(
-        new THREE.SphereGeometry(
-            0.35,
-            8,
-            6,
-            0,
-            Math.PI * 2,
-            0,
-            Math.PI / 2
-        ),
-        hairMaterial,
-        headGroup,
-        [0, 0.08, 0]
-    );
-
-
-    // ARMS
-
-    function createArm(side) {
-
-        const arm = new THREE.Group();
-
-        arm.position.set(side * 0.43, 1.48, 0);
-
-        character.add(arm);
-
-        makePart(
-            new THREE.CapsuleGeometry(0.13, 0.52, 3, 5),
-            outfitMaterial,
-            arm,
-            [0, -0.34, 0]
-        );
-
-        makePart(
-            new THREE.SphereGeometry(0.14, 6, 5),
-            skinMaterial,
-            arm,
-            [0, -0.68, 0]
-        );
-
-        return arm;
-    }
-
-
-    const leftArm = createArm(-1);
-    const rightArm = createArm(1);
-
-
-    // LEGS
-
-    function createLeg(side) {
-
-        const leg = new THREE.Group();
-
-        leg.position.set(side * 0.19, 0.85, 0);
-
-        character.add(leg);
-
-        makePart(
-            new THREE.CapsuleGeometry(0.17, 0.55, 3, 5),
-            trousersMaterial,
-            leg,
-            [0, -0.36, 0]
-        );
-
-        makePart(
-            new THREE.BoxGeometry(0.28, 0.15, 0.48),
-            shoeMaterial,
-            leg,
-            [0, -0.77, 0.08]
-        );
-
-        return leg;
-    }
-
-
-    const leftLeg = createLeg(-1);
-    const rightLeg = createLeg(1);
-
-
-    // ANIMATION REFERENCES
-
-    character.userData.parts = {
-
-        torso,
-
-        headGroup,
-
-        leftArm,
-        rightArm,
-
-        leftLeg,
-        rightLeg
-
-    };
-
-
-    character.userData.animationTime = 0;
-
-    return character;
-}
-
-
-// ==========================================
-// CREATE PLAYER
-// ==========================================
-
-const player = createCharacter();
-
-scene.add(player);
-
-
-// ==========================================
-// CHANGE CHARACTER APPEARANCE
-// ==========================================
-
-function updateCharacterAppearance(settings) {
-
-    const parts = player.userData.parts;
-
-    if (settings.skinTone !== undefined) {
-
-        parts.headGroup.children[0].material.color.set(
-            settings.skinTone
-        );
-
-        player.traverse(object => {
-
-            if (object.geometry?.type === "CapsuleGeometry" &&
-                object.material.color.getHex() === characterSettings.skinTone) {
-
-                object.material.color.set(settings.skinTone);
-            }
+            randomAppearance[property] = value;
 
         });
 
-    }
-
-    if (settings.outfit !== undefined) {
-
-        parts.torso.material.color.set(settings.outfit);
-
-        parts.leftArm.children[0].material.color.set(settings.outfit);
-        parts.rightArm.children[0].material.color.set(settings.outfit);
+        updateCharacter(player, randomAppearance);
 
     }
+);
 
-    if (settings.trousers !== undefined) {
 
-        parts.leftLeg.children[0].material.color.set(settings.trousers);
-        parts.rightLeg.children[0].material.color.set(settings.trousers);
+// RESET
+
+document.getElementById("reset-button").addEventListener(
+    "click",
+    () => {
+
+        const defaults = {
+            skin: 1,
+            hairstyle: 0,
+            hair: 0,
+            top: 0,
+            trousers: 0,
+            shoes: 0
+        };
+
+        Object.entries(selectors).forEach(([property, id]) => {
+
+            document.getElementById(id).value =
+                defaults[property];
+
+        });
+
+        updateCharacter(player, defaults);
 
     }
-
-}
+);
 
 
 // ==========================================
@@ -483,20 +272,20 @@ camera.lookAt(0, 1, 0);
 
 
 // ==========================================
-// KEYBOARD CONTROLS
+// KEYBOARD
 // ==========================================
 
 const keys = {};
 
-window.addEventListener("keydown", e => {
+window.addEventListener("keydown", event => {
 
-    keys[e.key.toLowerCase()] = true;
+    keys[event.key.toLowerCase()] = true;
 
 });
 
-window.addEventListener("keyup", e => {
+window.addEventListener("keyup", event => {
 
-    keys[e.key.toLowerCase()] = false;
+    keys[event.key.toLowerCase()] = false;
 
 });
 
@@ -527,13 +316,17 @@ function resetJoystick() {
 }
 
 
-function updateJoystick(e) {
+function updateJoystick(event) {
 
     const rect = joystick.getBoundingClientRect();
 
-    let x = e.clientX - (rect.left + rect.width / 2);
+    let x = event.clientX - (
+        rect.left + rect.width / 2
+    );
 
-    let y = e.clientY - (rect.top + rect.height / 2);
+    let y = event.clientY - (
+        rect.top + rect.height / 2
+    );
 
     const max = 35;
 
@@ -541,13 +334,12 @@ function updateJoystick(e) {
 
     if (distance > max) {
 
-        x = x / distance * max;
-        y = y / distance * max;
+        x = (x / distance) * max;
+        y = (y / distance) * max;
 
     }
 
     joystickX = x / max;
-
     joystickY = y / max;
 
     knob.style.transform = `translate(${x}px, ${y}px)`;
@@ -555,33 +347,35 @@ function updateJoystick(e) {
 }
 
 
-joystick.addEventListener("pointerdown", e => {
+joystick.addEventListener("pointerdown", event => {
 
     if (pointerId !== null) return;
 
-    pointerId = e.pointerId;
+    event.preventDefault();
+
+    pointerId = event.pointerId;
 
     joystick.setPointerCapture(pointerId);
 
-    updateJoystick(e);
+    updateJoystick(event);
 
 });
 
 
-joystick.addEventListener("pointermove", e => {
+joystick.addEventListener("pointermove", event => {
 
-    if (e.pointerId === pointerId) {
+    if (event.pointerId === pointerId) {
 
-        updateJoystick(e);
+        updateJoystick(event);
 
     }
 
 });
 
 
-joystick.addEventListener("pointerup", e => {
+joystick.addEventListener("pointerup", event => {
 
-    if (e.pointerId === pointerId) {
+    if (event.pointerId === pointerId) {
 
         resetJoystick();
 
@@ -594,77 +388,13 @@ joystick.addEventListener("pointercancel", resetJoystick);
 
 
 // ==========================================
-// ANIMATION SYSTEM
-// ==========================================
-
-function animateCharacter(speed, running, delta) {
-
-    const parts = player.userData.parts;
-
-    const moving = speed > 0.05;
-
-    player.userData.animationTime += delta *
-        (running ? 13 : 8);
-
-    const time = player.userData.animationTime;
-
-    if (moving) {
-
-        const swing = Math.sin(time) * (running ? 0.85 : 0.55);
-
-        parts.leftLeg.rotation.x = swing;
-        parts.rightLeg.rotation.x = -swing;
-
-        parts.leftArm.rotation.x = -swing * 0.7;
-        parts.rightArm.rotation.x = swing * 0.7;
-
-        parts.torso.rotation.x = running ? -0.08 : 0;
-
-    } else {
-
-        const breathing = Math.sin(time * 1.5) * 0.025;
-
-        parts.torso.scale.y = 1 + breathing;
-
-        parts.headGroup.rotation.y =
-            Math.sin(time * 0.5) * 0.04;
-
-        parts.leftLeg.rotation.x = THREE.MathUtils.lerp(
-            parts.leftLeg.rotation.x,
-            0,
-            0.15
-        );
-
-        parts.rightLeg.rotation.x = THREE.MathUtils.lerp(
-            parts.rightLeg.rotation.x,
-            0,
-            0.15
-        );
-
-        parts.leftArm.rotation.x = THREE.MathUtils.lerp(
-            parts.leftArm.rotation.x,
-            0,
-            0.15
-        );
-
-        parts.rightArm.rotation.x = THREE.MathUtils.lerp(
-            parts.rightArm.rotation.x,
-            0,
-            0.15
-        );
-
-    }
-
-}
-
-
-// ==========================================
-// GAME LOOP
+// ANIMATION
 // ==========================================
 
 const clock = new THREE.Clock();
 
 const direction = new THREE.Vector2();
+
 
 function animate() {
 
@@ -674,7 +404,6 @@ function animate() {
 
 
     let moveX = joystickX;
-
     let moveZ = joystickY;
 
 
@@ -690,9 +419,7 @@ function animate() {
     direction.set(moveX, moveZ);
 
     if (direction.length() > 1) {
-
         direction.normalize();
-
     }
 
 
@@ -702,6 +429,8 @@ function animate() {
 
     const speed = running ? 12 : 7;
 
+
+    // PLAYER MOVEMENT
 
     if (moving) {
 
@@ -720,49 +449,38 @@ function animate() {
     // CHARACTER ANIMATION
 
     player.userData.animate(
-    clock.elapsedTime,
-    moving,
-    running
-);
+        clock.elapsedTime,
+        moving,
+        running
+    );
 
 
     // CAMERA FOLLOW
 
     const target = new THREE.Vector3(
-
         player.position.x,
-
         player.position.y + 5.5,
-
         player.position.z + 8
-
     );
 
     camera.position.lerp(target, 0.08);
 
     camera.lookAt(
-
         player.position.x,
-
         player.position.y + 1,
-
         player.position.z
-
     );
 
 
     // COORDINATES
 
-    document.getElementById("coordinates").textContent =
-
+    coordinates.textContent =
         `X: ${player.position.x.toFixed(1)} | Z: ${player.position.z.toFixed(1)}`;
 
 
     renderer.render(scene, camera);
 
 }
-
-animate();
 
 
 // ==========================================
@@ -784,7 +502,9 @@ window.addEventListener("resize", () => {
 
 
 // ==========================================
-// CHARACTER SYSTEM READY
+// START GAME
 // ==========================================
 
-console.log("Lagos Legends: Character system loaded.");
+animate();
+
+console.log("LAGOS LEGENDS: Stage 2 loaded successfully!");
