@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <title>Lagos Legends</title>
+
+    <link rel="stylesheet" href="css/style.css">
+
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "/node_modules/three/build/three.module.js"
+        }
+    }
+    </script>
+</head>
+
+<body>
+
+    <div id="game-container"></div>
+
+    <div id="game-ui">
+        <h2>LAGOS LEGENDS</h2>
+        <p>THE CITY IS YOURS.</p>
+        <span id="coordinates">Initialising...</span>
+    </div>
+
+    <div id="joystick">
+        <div id="joystick-knob"></div>
+    </div>
+
+    <div id="controls-hint">
+        WASD / ARROW KEYS
+    </div>
+
+    <script type="module" src="js/main.js"></script>
+
+</body>
+</html>
