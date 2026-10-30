@@ -145,14 +145,99 @@ const characterSettings = {
 // ==========================================
 // CHARACTER BUILDER
 // ==========================================
+// ==========================================
+// PLAYER CHARACTER
+// ==========================================
 
-function createCharacter(settings = {}) {
+const player = createCharacter();
 
-    const appearance = {
-        ...characterSettings,
-        ...settings
+scene.add(player);
+
+// ==========================================
+// CHARACTER CUSTOMISATION UI
+// ==========================================
+
+const panel = document.getElementById("character-panel");
+
+document.getElementById("customise-button").onclick = () => {
+    panel.classList.add("open");
+};
+
+document.getElementById("close-panel").onclick = () => {
+    panel.classList.remove("open");
+};
+
+
+const selectors = {
+
+    skin: "skin-select",
+    hairstyle: "hairstyle-select",
+    hair: "hair-select",
+    top: "top-select",
+    trousers: "trousers-select",
+    shoes: "shoes-select"
+
+};
+
+
+Object.entries(selectors).forEach(([property, id]) => {
+
+    const element = document.getElementById(id);
+
+    element.addEventListener("change", () => {
+
+        updateCharacter(player, {
+            [property]: Number(element.value)
+        });
+
+    });
+
+});
+
+
+document.getElementById("randomise-button").onclick = () => {
+
+    const randomAppearance = {};
+
+    Object.entries(selectors).forEach(([property, id]) => {
+
+        const element = document.getElementById(id);
+
+        const max = element.options.length;
+
+        const value = Math.floor(Math.random() * max);
+
+        element.value = value;
+
+        randomAppearance[property] = value;
+
+    });
+
+    updateCharacter(player, randomAppearance);
+
+};
+
+
+document.getElementById("reset-button").onclick = () => {
+
+    const defaults = {
+        skin: 1,
+        hairstyle: 0,
+        hair: 0,
+        top: 0,
+        trousers: 0,
+        shoes: 0
     };
 
+    Object.entries(selectors).forEach(([property, id]) => {
+
+        document.getElementById(id).value = defaults[property];
+
+    });
+
+    updateCharacter(player, defaults);
+
+};
     const character = new THREE.Group();
 
     const skinMaterial = new THREE.MeshStandardMaterial({
@@ -634,11 +719,11 @@ function animate() {
 
     // CHARACTER ANIMATION
 
-    animateCharacter(
-        direction.length(),
-        running,
-        delta
-    );
+    player.userData.animate(
+    clock.elapsedTime,
+    moving,
+    running
+);
 
 
     // CAMERA FOLLOW
