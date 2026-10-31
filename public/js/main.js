@@ -5,23 +5,30 @@ import {
     updateCharacter
 } from "./character.js";
 
+// =====================================
+// LAGOS LEGENDS - STAGE 3.4 - 3.6
+// =====================================
+
 const container = document.getElementById("game-container");
 const coordinates = document.getElementById("coordinates");
 
 // =====================================
-// SCENE SETUP
+// WORLD SETTINGS
 // =====================================
+
+const WORLD_SIZE = 600;
+const WORLD_LIMIT = 265;
 
 const scene = new THREE.Scene();
 
 scene.background = new THREE.Color(0x9bcbd8);
-scene.fog = new THREE.Fog(0x9bcbd8, 90, 260);
+scene.fog = new THREE.Fog(0x9bcbd8, 120, 400);
 
 const camera = new THREE.PerspectiveCamera(
     65,
     window.innerWidth / window.innerHeight,
     0.1,
-    500
+    800
 );
 
 const renderer = new THREE.WebGLRenderer({
@@ -31,7 +38,6 @@ const renderer = new THREE.WebGLRenderer({
 
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
 renderer.setSize(window.innerWidth, window.innerHeight);
-
 container.appendChild(renderer.domElement);
 
 // =====================================
@@ -44,18 +50,36 @@ scene.add(
 
 const sunlight = new THREE.DirectionalLight(0xffffff, 2);
 
-sunlight.position.set(50, 80, 30);
+sunlight.position.set(80, 100, 50);
 scene.add(sunlight);
+
+// =====================================
+// MATERIALS
+// =====================================
+
+const materials = {
+    grass: new THREE.MeshStandardMaterial({ color: 0x77966a }),
+    road: new THREE.MeshStandardMaterial({ color: 0x454545 }),
+    pavement: new THREE.MeshStandardMaterial({ color: 0x999999 }),
+    white: new THREE.MeshBasicMaterial({ color: 0xffffff }),
+    yellow: new THREE.MeshBasicMaterial({ color: 0xe5c44a }),
+    concrete: new THREE.MeshStandardMaterial({ color: 0x99958b }),
+    tree: new THREE.MeshStandardMaterial({ color: 0x477746 }),
+    trunk: new THREE.MeshStandardMaterial({ color: 0x68452d }),
+    metal: new THREE.MeshStandardMaterial({ color: 0x555b5d }),
+    glass: new THREE.MeshStandardMaterial({
+        color: 0x527b91,
+        roughness: 0.3
+    })
+};
 
 // =====================================
 // GROUND
 // =====================================
 
 const ground = new THREE.Mesh(
-    new THREE.PlaneGeometry(350, 350),
-    new THREE.MeshStandardMaterial({
-        color: 0x77966a
-    })
+    new THREE.PlaneGeometry(WORLD_SIZE, WORLD_SIZE),
+    materials.grass
 );
 
 ground.rotation.x = -Math.PI / 2;
@@ -64,93 +88,105 @@ ground.position.y = -0.08;
 scene.add(ground);
 
 // =====================================
-// ROAD SYSTEM
+// ROAD NETWORK
 // =====================================
 
-const roadMaterial = new THREE.MeshStandardMaterial({
-    color: 0x454545
-});
+const ROAD_WIDTH = 14;
+const SIDEWALK_WIDTH = 2;
+const ROAD_POSITIONS = [-180, -120, -60, 0, 60, 120, 180];
 
-const pavementMaterial = new THREE.MeshStandardMaterial({
-    color: 0x999999
-});
-
-function createRoad(x, z, width, length, horizontal = false) {
+function createRoad(x, z, horizontal = false) {
 
     const road = new THREE.Mesh(
         new THREE.BoxGeometry(
-            horizontal ? length : width,
+            horizontal ? WORLD_SIZE : ROAD_WIDTH,
             0.12,
-            horizontal ? width : length
+            horizontal ? ROAD_WIDTH : WORLD_SIZE
         ),
-        roadMaterial
+        materials.road
     );
 
     road.position.set(x, 0, z);
     scene.add(road);
 
-    // Pavements
+    // Sidewalks
     for (const side of [-1, 1]) {
 
         const pavement = new THREE.Mesh(
             new THREE.BoxGeometry(
-                horizontal ? length : 2,
+                horizontal ? WORLD_SIZE : SIDEWALK_WIDTH,
                 0.18,
-                horizontal ? 2 : length
+                horizontal ? SIDEWALK_WIDTH : WORLD_SIZE
             ),
-            pavementMaterial
+            materials.pavement
         );
 
         pavement.position.set(
-            horizontal ? x : x + side * (width / 2 + 1),
+            horizontal ? x : x + side * (ROAD_WIDTH / 2 + 1),
             0.02,
-            horizontal ? z + side * (width / 2 + 1) : z
+            horizontal ? z + side * (ROAD_WIDTH / 2 + 1) : z
         );
 
         scene.add(pavement);
     }
 }
 
-// Main north-south road
-createRoad(0, 0, 14, 280);
+// Vertical roads
+ROAD_POSITIONS.forEach(x => {
+    createRoad(x, 0, false);
+});
 
-// East-west road
-createRoad(0, 0, 14, 280, true);
+// Horizontal roads
+ROAD_POSITIONS.forEach(z => {
+    createRoad(0, z, true);
+});
 
 // =====================================
 // ROAD MARKINGS
 // =====================================
 
-const lineMaterial = new THREE.MeshBasicMaterial({
-    color: 0xffffff
-});
+function createRoadMarkings() {
 
-// Main road markings
-for (let z = -130; z <= 130; z += 12) {
+    const lineLength = 5;
+    const spacing = 13;
 
-    const line = new THREE.Mesh(
-        new THREE.BoxGeometry(0.2, 0.04, 5),
-        lineMaterial
-    );
+    // Vertical road markings
+    ROAD_POSITIONS.forEach(x => {
 
-    line.position.set(0, 0.09, z);
-    scene.add(line);
+        for (let z = -285; z <= 285; z += spacing) {
+
+            const line = new THREE.Mesh(
+                new THREE.BoxGeometry(0.18, 0.04, lineLength),
+                materials.white
+            );
+
+            line.position.set(x, 0.09, z);
+            scene.add(line);
+        }
+
+    });
+
+    // Horizontal road markings
+    ROAD_POSITIONS.forEach(z => {
+
+        for (let x = -285; x <= 285; x += spacing) {
+
+            const line = new THREE.Mesh(
+                new THREE.BoxGeometry(lineLength, 0.04, 0.18),
+                materials.white
+            );
+
+            line.position.set(x, 0.09, z);
+            scene.add(line);
+        }
+
+    });
 }
 
-// Crossroad markings
-for (let x = -130; x <= 130; x += 12) {
-
-    const line = new THREE.Mesh(
-        new THREE.BoxGeometry(5, 0.04, 0.2),
-        lineMaterial
-    );
-
-    line.position.set(x, 0.09, 0);
-    scene.add(line);
-}
+createRoadMarkings();
 
 // =====================================
-// BUILDING MATERIALS
+// BUILDING CREATION
 // =====================================
 
 const cityColors = [
@@ -158,7 +194,8 @@ const cityColors = [
     0xc5b7a0,
     0xaaaeb5,
     0xc7a18a,
-    0xd4d0c5
+    0xd4d0c5,
+    0xb7a68e
 ];
 
 const residentialColors = [
@@ -166,7 +203,8 @@ const residentialColors = [
     0xc98c69,
     0xd8c6a0,
     0xb9a28b,
-    0xd2b7a0
+    0xd2b7a0,
+    0xc5b5a0
 ];
 
 // =====================================
@@ -190,56 +228,58 @@ function createCityBuilding(x, z, width, depth, height, color) {
 
     // Roof
     const roof = new THREE.Mesh(
-        new THREE.BoxGeometry(width + 0.5, 0.5, depth + 0.5),
-        new THREE.MeshStandardMaterial({
-            color: 0x555555
-        })
+        new THREE.BoxGeometry(width + 0.8, 0.6, depth + 0.8),
+        new THREE.MeshStandardMaterial({ color: 0x555555 })
     );
 
-    roof.position.y = height + 0.2;
+    roof.position.y = height + 0.3;
     building.add(roof);
 
-    // Windows
-    const windowMaterial = new THREE.MeshStandardMaterial({
-        color: 0x527b91,
-        metalness: 0.2,
-        roughness: 0.3
-    });
-
-    const floors = Math.max(1, Math.floor(height / 4));
+    // Windows on front and sides
+    const floors = Math.floor(height / 3.5);
 
     for (let floor = 0; floor < floors; floor++) {
 
         for (let i = 0; i < 3; i++) {
 
-            const windowMesh = new THREE.Mesh(
-                new THREE.BoxGeometry(0.1, 1.4, 1.5),
-                windowMaterial
+            const frontWindow = new THREE.Mesh(
+                new THREE.BoxGeometry(1.8, 1.4, 0.12),
+                materials.glass
             );
 
-            windowMesh.position.set(
-                width / 2 + 0.06,
-                2 + floor * 3.5,
-                -depth / 3 + i * (depth / 3)
+            frontWindow.position.set(
+                -width / 3 + i * (width / 3),
+                2.2 + floor * 3.5,
+                depth / 2 + 0.08
             );
 
-            building.add(windowMesh);
+            building.add(frontWindow);
+
         }
+
     }
+
+    // Entrance
+    const entrance = new THREE.Mesh(
+        new THREE.BoxGeometry(2.2, 2.8, 0.15),
+        new THREE.MeshStandardMaterial({ color: 0x393d42 })
+    );
+
+    entrance.position.set(0, 1.4, depth / 2 + 0.1);
+    building.add(entrance);
 
     building.position.set(x, 0, z);
     scene.add(building);
 }
 
 // =====================================
-// LOCAL RESIDENTIAL BUILDINGS
+// RESIDENTIAL HOUSES
 // =====================================
 
 function createHouse(x, z, width, depth, color) {
 
     const house = new THREE.Group();
 
-    // Main walls
     const walls = new THREE.Mesh(
         new THREE.BoxGeometry(width, 4, depth),
         new THREE.MeshStandardMaterial({
@@ -254,9 +294,7 @@ function createHouse(x, z, width, depth, color) {
     // Roof
     const roof = new THREE.Mesh(
         new THREE.ConeGeometry(width * 0.8, 2.5, 4),
-        new THREE.MeshStandardMaterial({
-            color: 0x984b36
-        })
+        new THREE.MeshStandardMaterial({ color: 0x984b36 })
     );
 
     roof.position.y = 5;
@@ -265,25 +303,19 @@ function createHouse(x, z, width, depth, color) {
 
     // Door
     const door = new THREE.Mesh(
-        new THREE.BoxGeometry(1.2, 2.4, 0.12),
-        new THREE.MeshStandardMaterial({
-            color: 0x573b29
-        })
+        new THREE.BoxGeometry(1.3, 2.5, 0.12),
+        new THREE.MeshStandardMaterial({ color: 0x573b29 })
     );
 
-    door.position.set(0, 1.2, depth / 2 + 0.08);
+    door.position.set(0, 1.25, depth / 2 + 0.08);
     house.add(door);
 
-    // Front windows
-    const windowMaterial = new THREE.MeshStandardMaterial({
-        color: 0x547a91
-    });
-
+    // Windows
     for (const side of [-1, 1]) {
 
         const windowMesh = new THREE.Mesh(
-            new THREE.BoxGeometry(1.3, 1.1, 0.12),
-            windowMaterial
+            new THREE.BoxGeometry(1.4, 1.2, 0.12),
+            materials.glass
         );
 
         windowMesh.position.set(
@@ -295,45 +327,382 @@ function createHouse(x, z, width, depth, color) {
         house.add(windowMesh);
     }
 
+    // Roof water tank
+    const tank = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.9, 0.9, 1.8, 8),
+        new THREE.MeshStandardMaterial({ color: 0x245c85 })
+    );
+
+    tank.position.set(width / 3, 5.5, -depth / 4);
+    house.add(tank);
+
     house.position.set(x, 0, z);
     scene.add(house);
+
+    return house;
 }
 
 // =====================================
-// COMMERCIAL DISTRICT
+// COMPOUND FENCES
 // =====================================
 
-// Left side
-createCityBuilding(-22, -25, 12, 12, 17, cityColors[0]);
-createCityBuilding(-22, 0, 12, 12, 23, cityColors[2]);
-createCityBuilding(-22, 25, 12, 12, 14, cityColors[3]);
+function createFence(x, z, width, depth) {
 
-// Right side
-createCityBuilding(22, -25, 12, 12, 20, cityColors[1]);
-createCityBuilding(22, 0, 12, 12, 15, cityColors[4]);
-createCityBuilding(22, 25, 12, 12, 25, cityColors[0]);
+    const fenceMaterial = new THREE.MeshStandardMaterial({
+        color: 0xb7b0a1
+    });
+
+    const fence = new THREE.Group();
+
+    function wall(w, h, d, px, pz) {
+
+        const mesh = new THREE.Mesh(
+            new THREE.BoxGeometry(w, h, d),
+            fenceMaterial
+        );
+
+        mesh.position.set(px, h / 2, pz);
+        fence.add(mesh);
+    }
+
+    // Back and side walls.
+    wall(width, 1.7, 0.35, 0, -depth / 2);
+    wall(0.35, 1.7, depth, -width / 2, 0);
+    wall(0.35, 1.7, depth, width / 2, 0);
+
+    // Front wall sections leave a gate opening.
+    wall(width * 0.36, 1.7, 0.35, -width * 0.32, depth / 2);
+    wall(width * 0.36, 1.7, 0.35, width * 0.32, depth / 2);
+
+    // Gate posts
+    for (const side of [-1, 1]) {
+
+        const post = new THREE.Mesh(
+            new THREE.BoxGeometry(0.6, 2.3, 0.6),
+            materials.concrete
+        );
+
+        post.position.set(side * width * 0.14, 1.15, depth / 2);
+        fence.add(post);
+    }
+
+    fence.position.set(x, 0, z);
+    scene.add(fence);
+}
 
 // =====================================
-// RESIDENTIAL DISTRICT
+// STREETLIGHTS
 // =====================================
 
-// Residential houses behind commercial buildings
-createHouse(-42, -30, 10, 12, residentialColors[0]);
-createHouse(-42, -10, 11, 13, residentialColors[1]);
-createHouse(-42, 15, 10, 12, residentialColors[2]);
-createHouse(-42, 40, 12, 14, residentialColors[3]);
+function createStreetlight(x, z) {
 
-createHouse(42, -30, 11, 13, residentialColors[1]);
-createHouse(42, -10, 10, 12, residentialColors[3]);
-createHouse(42, 15, 12, 14, residentialColors[0]);
-createHouse(42, 40, 10, 12, residentialColors[2]);
+    const group = new THREE.Group();
+
+    const pole = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.12, 0.18, 6, 6),
+        materials.metal
+    );
+
+    pole.position.y = 3;
+    group.add(pole);
+
+    const arm = new THREE.Mesh(
+        new THREE.BoxGeometry(1.8, 0.12, 0.12),
+        materials.metal
+    );
+
+    arm.position.set(0.8, 5.8, 0);
+    group.add(arm);
+
+    const lamp = new THREE.Mesh(
+        new THREE.BoxGeometry(0.8, 0.25, 0.5),
+        new THREE.MeshBasicMaterial({ color: 0xffe8a3 })
+    );
+
+    lamp.position.set(1.5, 5.7, 0);
+    group.add(lamp);
+
+    group.position.set(x, 0, z);
+    scene.add(group);
+}
+
+// =====================================
+// ROADSIDE TREES
+// =====================================
+
+function createTree(x, z, scale = 1) {
+
+    const tree = new THREE.Group();
+
+    const trunk = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.35, 0.5, 3, 6),
+        materials.trunk
+    );
+
+    trunk.position.y = 1.5;
+    tree.add(trunk);
+
+    const leaves = new THREE.Mesh(
+        new THREE.SphereGeometry(2.2, 7, 6),
+        materials.tree
+    );
+
+    leaves.position.y = 4;
+    tree.add(leaves);
+
+    tree.scale.setScalar(scale);
+
+    tree.position.set(x, 0, z);
+    scene.add(tree);
+}
+
+// =====================================
+// ROADSIDE KIOSKS
+// =====================================
+
+function createKiosk(x, z, color) {
+
+    const kiosk = new THREE.Group();
+
+    const body = new THREE.Mesh(
+        new THREE.BoxGeometry(5, 3.2, 4),
+        new THREE.MeshStandardMaterial({ color })
+    );
+
+    body.position.y = 1.6;
+    kiosk.add(body);
+
+    const roof = new THREE.Mesh(
+        new THREE.BoxGeometry(5.5, 0.35, 4.5),
+        new THREE.MeshStandardMaterial({ color: 0x333333 })
+    );
+
+    roof.position.y = 3.4;
+    kiosk.add(roof);
+
+    // Shop opening
+    const opening = new THREE.Mesh(
+        new THREE.BoxGeometry(2.8, 1.4, 0.1),
+        materials.glass
+    );
+
+    opening.position.set(0, 2, 2.05);
+    kiosk.add(opening);
+
+    kiosk.position.set(x, 0, z);
+    scene.add(kiosk);
+}
+
+// =====================================
+// BUS STOPS
+// =====================================
+
+function createBusStop(x, z) {
+
+    const stop = new THREE.Group();
+
+    const roof = new THREE.Mesh(
+        new THREE.BoxGeometry(8, 0.4, 3),
+        new THREE.MeshStandardMaterial({ color: 0x267b63 })
+    );
+
+    roof.position.y = 3.5;
+    stop.add(roof);
+
+    for (const px of [-3.5, 3.5]) {
+
+        const pillar = new THREE.Mesh(
+            new THREE.BoxGeometry(0.3, 3.5, 0.3),
+            materials.metal
+        );
+
+        pillar.position.set(px, 1.75, 0);
+        stop.add(pillar);
+    }
+
+    const bench = new THREE.Mesh(
+        new THREE.BoxGeometry(5, 0.3, 1),
+        new THREE.MeshStandardMaterial({ color: 0x65442c })
+    );
+
+    bench.position.set(0, 1, 0.7);
+    stop.add(bench);
+
+    const sign = new THREE.Mesh(
+        new THREE.BoxGeometry(3, 1, 0.15),
+        new THREE.MeshStandardMaterial({ color: 0xf0cf46 })
+    );
+
+    sign.position.set(0, 2.8, 1.5);
+    stop.add(sign);
+
+    stop.position.set(x, 0, z);
+    scene.add(stop);
+}
+
+// =====================================
+// COMMERCIAL DISTRICT GENERATION
+// =====================================
+
+const commercialBuildings = [
+    [-30, -35, 15, 15, 24],
+    [30, -35, 15, 15, 18],
+    [-30, 35, 16, 15, 28],
+    [30, 35, 15, 15, 21],
+
+    [-90, -30, 16, 15, 20],
+    [-90, 30, 15, 15, 16],
+    [90, -30, 16, 15, 25],
+    [90, 30, 15, 15, 19],
+
+    [-150, -30, 15, 15, 18],
+    [150, 30, 15, 15, 23]
+];
+
+commercialBuildings.forEach((building, index) => {
+
+    const [x, z, width, depth, height] = building;
+
+    createCityBuilding(
+        x,
+        z,
+        width,
+        depth,
+        height,
+        cityColors[index % cityColors.length]
+    );
+
+});
+
+// =====================================
+// RESIDENTIAL DISTRICTS
+// =====================================
+
+const residentialLocations = [
+    [-220, -35],
+    [-220, 35],
+    [-220, 90],
+    [-220, 150],
+
+    [220, -35],
+    [220, 35],
+    [220, 90],
+    [220, 150],
+
+    [-150, 90],
+    [-90, 90],
+    [90, 90],
+    [150, 90],
+
+    [-150, -90],
+    [-90, -90],
+    [90, -90],
+    [150, -90],
+
+    [-220, -150],
+    [220, -150]
+];
+
+residentialLocations.forEach((location, index) => {
+
+    const [x, z] = location;
+
+    createHouse(
+        x,
+        z,
+        13,
+        15,
+        residentialColors[index % residentialColors.length]
+    );
+
+    createFence(x, z, 19, 22);
+
+});
+
+// =====================================
+// ADDITIONAL CITY STRUCTURES
+// =====================================
+
+// Small shops
+createKiosk(-50, 90, 0xd8a13b);
+createKiosk(50, -90, 0xc96d38);
+createKiosk(150, 90, 0x3d9970);
+
+// Bus stops
+createBusStop(-12, -90);
+createBusStop(12, 90);
+
+// =====================================
+// STREETLIGHT PLACEMENT
+// =====================================
+
+for (let z = -240; z <= 240; z += 60) {
+
+    createStreetlight(-10, z);
+    createStreetlight(10, z);
+
+}
+
+for (let x = -240; x <= 240; x += 60) {
+
+    createStreetlight(x, -10);
+    createStreetlight(x, 10);
+
+}
+
+// =====================================
+// TREE PLACEMENT
+// =====================================
+
+const treeLocations = [
+    [-50, -45], [50, 45],
+    [-110, -45], [110, 45],
+    [-170, -45], [170, 45],
+    [-50, 110], [50, -110],
+    [-170, 110], [170, -110],
+    [-250, 50], [250, -50],
+    [-250, 150], [250, 150]
+];
+
+treeLocations.forEach((position, index) => {
+
+    createTree(
+        position[0],
+        position[1],
+        index % 3 === 0 ? 1.2 : 0.9
+    );
+
+});
+
+// =====================================
+// WORLD BOUNDARIES
+// =====================================
+
+const boundaryMaterial = new THREE.MeshStandardMaterial({
+    color: 0x6c795c
+});
+
+function createBoundary(x, z, width, depth) {
+
+    const wall = new THREE.Mesh(
+        new THREE.BoxGeometry(width, 3, depth),
+        boundaryMaterial
+    );
+
+    wall.position.set(x, 1.5, z);
+    scene.add(wall);
+}
+
+createBoundary(0, -WORLD_LIMIT, WORLD_SIZE, 2);
+createBoundary(0, WORLD_LIMIT, WORLD_SIZE, 2);
+createBoundary(-WORLD_LIMIT, 0, 2, WORLD_SIZE);
+createBoundary(WORLD_LIMIT, 0, 2, WORLD_SIZE);
 
 // =====================================
 // PLAYER
 // =====================================
 
 const player = createCharacter();
-
 scene.add(player);
 
 // =====================================
@@ -375,7 +744,7 @@ Object.entries(selectors).forEach(([property, id]) => {
 
 });
 
-// Randomise
+// Randomise character
 document.getElementById("randomise-button").addEventListener("click", () => {
 
     const randomAppearance = {};
@@ -387,7 +756,6 @@ document.getElementById("randomise-button").addEventListener("click", () => {
         const value = Math.floor(Math.random() * element.options.length);
 
         element.value = value;
-
         randomAppearance[property] = value;
 
     });
@@ -396,7 +764,7 @@ document.getElementById("randomise-button").addEventListener("click", () => {
 
 });
 
-// Reset
+// Reset character
 document.getElementById("reset-button").addEventListener("click", () => {
 
     const defaults = {
@@ -419,17 +787,13 @@ document.getElementById("reset-button").addEventListener("click", () => {
 });
 
 // =====================================
-// CAMERA
-// =====================================
-
-// =====================================
-// THIRD-PERSON CAMERA SYSTEM
+// THIRD-PERSON CAMERA
 // =====================================
 
 let cameraYaw = 0;
 let cameraPitch = 0.25;
 
-const cameraDistance = 9;
+const cameraDistance = 10;
 const cameraHeight = 2.5;
 
 let cameraTouchId = null;
@@ -460,27 +824,24 @@ function updateCamera() {
         cameraHeight +
         cameraDistance * Math.sin(cameraPitch);
 
-    const targetPosition = new THREE.Vector3(
-        cameraX,
-        cameraY,
-        cameraZ
+    camera.position.lerp(
+        new THREE.Vector3(cameraX, cameraY, cameraZ),
+        0.15
     );
-
-    camera.position.lerp(targetPosition, 0.15);
 
     camera.lookAt(
         player.position.x,
         player.position.y + 1.5,
         player.position.z
     );
-}
-// =====================================
-// MOBILE CAMERA TOUCH CONTROLS
-// =====================================
 
+}
+
+// Mobile camera controls
 renderer.domElement.addEventListener("pointerdown", event => {
 
-    // Ignore the left side: joystick owns movement.
+    if (event.pointerType === "mouse") return;
+
     if (event.clientX < window.innerWidth * 0.45) return;
 
     if (cameraTouchId !== null) return;
@@ -502,14 +863,9 @@ renderer.domElement.addEventListener("pointermove", event => {
     const deltaY = event.clientY - lastTouchY;
 
     cameraYaw -= deltaX * cameraSensitivity;
-
     cameraPitch += deltaY * cameraSensitivity;
 
-    cameraPitch = THREE.MathUtils.clamp(
-        cameraPitch,
-        -0.35,
-        0.85
-    );
+    cameraPitch = THREE.MathUtils.clamp(cameraPitch, -0.35, 0.85);
 
     lastTouchX = event.clientX;
     lastTouchY = event.clientY;
@@ -526,10 +882,8 @@ function releaseCameraTouch(event) {
 
 renderer.domElement.addEventListener("pointerup", releaseCameraTouch);
 renderer.domElement.addEventListener("pointercancel", releaseCameraTouch);
-// =====================================
-// PC MOUSE CAMERA CONTROLS
-// =====================================
 
+// PC mouse camera
 renderer.domElement.addEventListener("mousedown", event => {
 
     if (event.button !== 2) return;
@@ -555,11 +909,7 @@ window.addEventListener("mousemove", event => {
     cameraYaw -= deltaX * cameraSensitivity;
     cameraPitch += deltaY * cameraSensitivity;
 
-    cameraPitch = THREE.MathUtils.clamp(
-        cameraPitch,
-        -0.35,
-        0.85
-    );
+    cameraPitch = THREE.MathUtils.clamp(cameraPitch, -0.35, 0.85);
 
     lastMouseX = event.clientX;
     lastMouseY = event.clientY;
@@ -569,6 +919,7 @@ window.addEventListener("mousemove", event => {
 renderer.domElement.addEventListener("contextmenu", event => {
     event.preventDefault();
 });
+
 // =====================================
 // KEYBOARD CONTROLS
 // =====================================
@@ -664,7 +1015,6 @@ joystick.addEventListener("pointercancel", resetJoystick);
 // =====================================
 
 const clock = new THREE.Clock();
-
 const direction = new THREE.Vector2();
 
 function animate() {
@@ -694,30 +1044,40 @@ function animate() {
 
     if (moving) {
 
-    // Calculate movement relative to camera direction
-    const forwardX = -Math.sin(cameraYaw);
-    const forwardZ = -Math.cos(cameraYaw);
+        // Camera-relative movement
+        const forwardX = -Math.sin(cameraYaw);
+        const forwardZ = -Math.cos(cameraYaw);
 
-    const rightX = Math.cos(cameraYaw);
-    const rightZ = -Math.sin(cameraYaw);
+        const rightX = Math.cos(cameraYaw);
+        const rightZ = -Math.sin(cameraYaw);
 
-    // Convert joystick input into world direction
-    const worldX =
-        rightX * direction.x +
-        forwardX * -direction.y;
+        const worldX =
+            rightX * direction.x +
+            forwardX * -direction.y;
 
-    const worldZ =
-        rightZ * direction.x +
-        forwardZ * -direction.y;
+        const worldZ =
+            rightZ * direction.x +
+            forwardZ * -direction.y;
 
-    // Move character
-    player.position.x += worldX * speed * delta;
-    player.position.z += worldZ * speed * delta;
+        player.position.x += worldX * speed * delta;
+        player.position.z += worldZ * speed * delta;
 
-    // Rotate character towards movement direction
-    player.rotation.y = Math.atan2(worldX, worldZ);
+        player.rotation.y = Math.atan2(worldX, worldZ);
 
-}
+    }
+
+    // Keep player inside the playable world
+    player.position.x = THREE.MathUtils.clamp(
+        player.position.x,
+        -WORLD_LIMIT + 5,
+        WORLD_LIMIT - 5
+    );
+
+    player.position.z = THREE.MathUtils.clamp(
+        player.position.z,
+        -WORLD_LIMIT + 5,
+        WORLD_LIMIT - 5
+    );
 
     player.userData.animate(
         clock.elapsedTime,
@@ -725,12 +1085,13 @@ function animate() {
         running
     );
 
-    // Camera follows player
     updateCamera();
+
     coordinates.textContent =
         `X: ${player.position.x.toFixed(1)} | Z: ${player.position.z.toFixed(1)}`;
 
     renderer.render(scene, camera);
+
 }
 
 animate();
@@ -742,7 +1103,6 @@ animate();
 window.addEventListener("resize", () => {
 
     camera.aspect = window.innerWidth / window.innerHeight;
-
     camera.updateProjectionMatrix();
 
     renderer.setSize(
@@ -752,4 +1112,4 @@ window.addEventListener("resize", () => {
 
 });
 
-console.log("LAGOS LEGENDS: STAGE 3.1 - 3.3 LOADED!");
+console.log("LAGOS LEGENDS: STAGE 3.4 - 3.6 LOADED!");
