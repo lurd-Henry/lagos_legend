@@ -1067,11 +1067,11 @@ joystick.addEventListener("pointercancel", resetJoystick);
 
 const clock = new THREE.Clock();
 const direction = new THREE.Vector2();
-console.log("CHECK 3: Starting game loop");
+
 function animate() {
 
     requestAnimationFrame(animate);
-
+console.log("CHECK 4: Animation running");
     const delta = Math.min(clock.getDelta(), 0.05);
 
     let moveX = joystickX;
@@ -1149,7 +1149,7 @@ function animate() {
     renderer.render(scene, camera);
 
 }
-
+console.log("CHECK 3: Starting game loop");
 animate();
 
 // =====================================
