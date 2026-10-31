@@ -34,7 +34,6 @@ const WORLD_LIMIT = 265;
 
 const scene = new THREE.Scene();
 const world = new WorldSystems(scene);
-console.log("CHECK 1: World system initialised");
 
 scene.background = new THREE.Color(0x9bcbd8);
 scene.fog = new THREE.Fog(0x9bcbd8, 120, 400);
@@ -749,7 +748,6 @@ createBoundary(WORLD_LIMIT, 0, 2, WORLD_SIZE);
 
 const player = createCharacter();
 scene.add(player);
-console.log("CHECK 2: Character created");
 // =====================================
 // CHARACTER CUSTOMISATION
 // =====================================
@@ -1071,7 +1069,7 @@ const direction = new THREE.Vector2();
 function animate() {
 
     requestAnimationFrame(animate);
-console.log("CHECK 4: Animation running");
+
     const delta = Math.min(clock.getDelta(), 0.05);
 
     let moveX = joystickX;
@@ -1149,7 +1147,7 @@ console.log("CHECK 4: Animation running");
     renderer.render(scene, camera);
 
 }
-console.log("CHECK 3: Starting game loop");
+
 animate();
 
 // =====================================
