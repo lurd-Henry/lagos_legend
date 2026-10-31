@@ -5,7 +5,19 @@ import {
     updateCharacter
 } from "./character.js";
 import { WorldSystems } from "./worldSystems.js";
+// =====================================
+// DEBUGGING - ERROR DETECTOR
+// =====================================
 
+window.addEventListener("error", (event) => {
+    console.error("GAME ERROR:", event.message);
+    console.error("FILE:", event.filename);
+    console.error("LINE:", event.lineno);
+});
+
+window.addEventListener("unhandledrejection", (event) => {
+    console.error("PROMISE ERROR:", event.reason);
+});
 // =====================================
 // LAGOS LEGENDS - STAGE 3.4 - 3.6
 // =====================================
@@ -22,6 +34,7 @@ const WORLD_LIMIT = 265;
 
 const scene = new THREE.Scene();
 const world = new WorldSystems(scene);
+console.log("CHECK 1: World system initialised");
 
 scene.background = new THREE.Color(0x9bcbd8);
 scene.fog = new THREE.Fog(0x9bcbd8, 120, 400);
@@ -736,7 +749,7 @@ createBoundary(WORLD_LIMIT, 0, 2, WORLD_SIZE);
 
 const player = createCharacter();
 scene.add(player);
-
+console.log("CHECK 2: Character created");
 // =====================================
 // CHARACTER CUSTOMISATION
 // =====================================
@@ -1054,7 +1067,7 @@ joystick.addEventListener("pointercancel", resetJoystick);
 
 const clock = new THREE.Clock();
 const direction = new THREE.Vector2();
-
+console.log("CHECK 3: Starting game loop");
 function animate() {
 
     requestAnimationFrame(animate);
