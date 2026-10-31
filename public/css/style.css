@@ -44,43 +44,213 @@ canvas {
     font-size: 11px;
 }
 
+/* =================================
+   MOBILE GAME HUD
+================================= */
+
+#game-container {
+    position: relative;
+    overflow: hidden;
+}
+
 #joystick {
     position: absolute;
+    z-index: 50;
     bottom: 35px;
-    left: 30px;
-    width: 115px;
-    height: 115px;
+    left: 25px;
+
+    width: 125px;
+    height: 125px;
+
     border-radius: 50%;
-    background: rgba(255,255,255,0.18);
-    border: 2px solid rgba(255,255,255,0.5);
+
+    background: rgba(255,255,255,0.12);
+    border: 2px solid rgba(255,255,255,0.35);
+
     display: flex;
     align-items: center;
     justify-content: center;
+
     touch-action: none;
+    user-select: none;
 }
 
 #joystick-knob {
-    width: 48px;
-    height: 48px;
-    background: rgba(255,255,255,0.85);
+    position: relative;
+    z-index: 2;
+
+    width: 50px;
+    height: 50px;
+
     border-radius: 50%;
+
+    background: rgba(255,255,255,0.85);
+    border: 2px solid white;
+
     pointer-events: none;
+    transition: background 0.15s;
+}
+
+#sprint-zone {
+    position: absolute;
+    top: 5px;
+
+    color: rgba(255,255,255,0.5);
+    font-size: 9px;
+    font-weight: 900;
+    letter-spacing: 1px;
+
+    pointer-events: none;
+}
+
+/* =================================
+   CIRCULAR ACTION BUTTONS
+================================= */
+
+.control-button {
+    width: 64px;
+    height: 64px;
+
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.65);
+
+    background: rgba(20,25,30,0.65);
+    color: white;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    font-size: 23px;
+
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.control-button:active,
+.control-button.active {
+    background: rgba(220,170,70,0.9);
+    border-color: white;
+    transform: scale(0.94);
+}
+
+#walking-controls {
+    position: absolute;
+    z-index: 50;
+    right: 25px;
+    bottom: 40px;
+}
+
+#sprint-button {
+    width: 68px;
+    height: 68px;
+}
+
+/* =================================
+   VEHICLE HUD
+================================= */
+
+#vehicle-controls {
+    position: absolute;
+    z-index: 50;
+    right: 20px;
+    bottom: 25px;
+
+    display: none;
+    align-items: center;
+    gap: 12px;
+}
+
+.vehicle-button {
+    width: 72px;
+    height: 72px;
+}
+
+.vehicle-button span {
+    font-size: 24px;
+}
+
+.vehicle-button small {
+    font-size: 8px;
+    font-weight: 900;
+    letter-spacing: 1px;
+}
+
+#exit-vehicle-button {
+    position: absolute;
+    right: 0;
+    bottom: 90px;
+
+    width: 52px;
+    height: 52px;
+    font-size: 18px;
+}
+
+/* =================================
+   CONTEXTUAL INTERACTION
+================================= */
+
+#game-interact-button {
+    position: absolute;
+    z-index: 60;
+
+    right: 25px;
+    bottom: 125px;
+
+    width: 65px;
+    height: 65px;
+
+    border-radius: 50%;
+    border: 2px solid white;
+
+    background: rgba(25,30,35,0.85);
+    color: white;
+
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    font-size: 24px;
+    touch-action: manipulation;
+}
+
+#game-interact-button small {
+    font-size: 8px;
+    font-weight: bold;
+    margin-top: 2px;
 }
 
 #controls-hint {
     position: absolute;
     right: 20px;
-    bottom: 25px;
+    bottom: 15px;
+
     color: white;
     font-size: 10px;
     text-shadow: 0 2px 5px #333;
+    pointer-events: none;
 }
 
+/* Desktop */
+
 @media (min-width: 800px) {
+
     #joystick {
         display: none;
     }
+
+    #walking-controls,
+    #vehicle-controls {
+        display: none !important;
+    }
+
 }
+
 /* =================================
    CHARACTER CUSTOMISATION
 ================================= */
