@@ -90,80 +90,83 @@ export class WorldSystems {
 
     createInteractionUI() {
 
-        const button = document.createElement("button");
+    const container = document.getElementById("game-container");
 
-        button.id = "game-interact-button";
-        button.textContent = "INTERACT";
-
-        Object.assign(button.style, {
-            position: "absolute",
-            bottom: "125px",
-            right: "25px",
-            display: "none",
-            padding: "15px 22px",
-            border: "2px solid white",
-            borderRadius: "12px",
-            background: "#202020",
-            color: "white",
-            fontWeight: "bold",
-            fontSize: "13px",
-            zIndex: "20",
-            cursor: "pointer",
-            touchAction: "manipulation"
-        });
-
-        document.getElementById("game-container")
-            .appendChild(button);
-
-        this.button = button;
-
-        button.addEventListener("click", () => {
-            this.interact();
-        });
-
+    if (!container) {
+        console.error("Game container not found!");
+        return;
     }
+
+    const button = document.createElement("button");
+
+    button.id = "game-interact-button";
+    button.textContent = "INTERACT";
+
+    Object.assign(button.style, {
+        position: "absolute",
+        bottom: "125px",
+        right: "25px",
+        display: "none",
+        padding: "15px 22px",
+        border: "2px solid white",
+        borderRadius: "12px",
+        background: "#202020",
+        color: "white",
+        fontWeight: "bold",
+        fontSize: "13px",
+        zIndex: "100",
+        cursor: "pointer",
+        touchAction: "manipulation"
+    });
+
+    container.appendChild(button);
+
+    this.button = button;
+
+    button.addEventListener("click", () => {
+        this.interact();
+    });
+
+}
 
     updateInteractions(player) {
 
-        let nearest = null;
-        let nearestDistance = Infinity;
+    if (!this.button || !player) return;
 
-        for (const object of this.interactables) {
+    let nearest = null;
+    let nearestDistance = Infinity;
 
-            const distance = Math.hypot(
-                player.position.x - object.x,
-                player.position.z - object.z
-            );
+    for (const object of this.interactables) {
 
-            if (
-                distance < this.interactionDistance &&
-                distance < nearestDistance
-            ) {
+        const distance = Math.hypot(
+            player.position.x - object.x,
+            player.position.z - object.z
+        );
 
-                nearest = object;
-                nearestDistance = distance;
-
-            }
-
-        }
-
-        this.currentInteraction = nearest;
-
-        if (nearest) {
-
-            this.button.style.display = "block";
-
-            this.button.textContent =
-                nearest.buttonText || "INTERACT";
-
-        } else {
-
-            this.button.style.display = "none";
-
+        if (
+            distance < this.interactionDistance &&
+            distance < nearestDistance
+        ) {
+            nearest = object;
+            nearestDistance = distance;
         }
 
     }
 
+    this.currentInteraction = nearest;
+
+    if (nearest) {
+
+        this.button.style.display = "block";
+        this.button.textContent = nearest.buttonText || "INTERACT";
+
+    } else {
+
+        this.button.style.display = "none";
+
+    }
+
+}
     interact() {
 
         if (!this.currentInteraction) return;
