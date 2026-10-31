@@ -5,6 +5,7 @@ import {
     updateCharacter
 } from "./character.js";
 import { WorldSystems } from "./worldSystems.js";
+import { VehicleSystems } from "./vehicleSystems.js";
 // =====================================
 // DEBUGGING - ERROR DETECTOR
 // =====================================
@@ -34,6 +35,7 @@ const WORLD_LIMIT = 265;
 
 const scene = new THREE.Scene();
 const world = new WorldSystems(scene);
+const vehicleSystem = new VehicleSystems(scene, world);
 
 scene.background = new THREE.Color(0x9bcbd8);
 scene.fog = new THREE.Fog(0x9bcbd8, 120, 400);
@@ -748,6 +750,8 @@ createBoundary(WORLD_LIMIT, 0, 2, WORLD_SIZE);
 
 const player = createCharacter();
 scene.add(player);
+
+vehicleSystem.playerReference = player;
 // =====================================
 // CHARACTER CUSTOMISATION
 // =====================================
@@ -971,7 +975,17 @@ const keys = {};
 window.addEventListener("keydown", event => {
 
     if (event.key.toLowerCase() === "e") {
-        world.interact();
+
+        if (vehicleSystem.isDriving) {
+
+            vehicleSystem.exitVehicle(player);
+
+        } else {
+
+            world.interact();
+
+        }
+
     }
 
 });
@@ -1087,37 +1101,53 @@ function animate() {
     }
 
     const moving = direction.length() > 0.05;
-    const running = !!keys["shift"];
+const running = !!keys["shift"];
 
-    const speed = running ? 12 : 7;
+const speed = running ? 12 : 7;
 
-    if (moving) {
+// =====================================
+// VEHICLE DRIVING
+// =====================================
 
-        // Camera-relative movement
-        const forwardX = -Math.sin(cameraYaw);
-        const forwardZ = -Math.cos(cameraYaw);
+if (vehicleSystem.isDriving) {
 
-        const rightX = Math.cos(cameraYaw);
-        const rightZ = -Math.sin(cameraYaw);
+    vehicleSystem.update(
+        player,
+        keys,
+        joystickX,
+        joystickY,
+        delta
+    );
 
-        const worldX =
-            rightX * direction.x +
-            forwardX * -direction.y;
+} else if (moving) {
 
-        const worldZ =
-            rightZ * direction.x +
-            forwardZ * -direction.y;
+    // Camera-relative character movement
 
-        world.movePlayer(
-    player,
-    worldX,
-    worldZ,
-    speed,
-    delta
-);
-        player.rotation.y = Math.atan2(worldX, worldZ);
+    const forwardX = -Math.sin(cameraYaw);
+    const forwardZ = -Math.cos(cameraYaw);
 
-    }
+    const rightX = Math.cos(cameraYaw);
+    const rightZ = -Math.sin(cameraYaw);
+
+    const worldX =
+        rightX * direction.x +
+        forwardX * -direction.y;
+
+    const worldZ =
+        rightZ * direction.x +
+        forwardZ * -direction.y;
+
+    world.movePlayer(
+        player,
+        worldX,
+        worldZ,
+        speed,
+        delta
+    );
+
+    player.rotation.y = Math.atan2(worldX, worldZ);
+
+}
 
     // Keep player inside the playable world
     player.position.x = THREE.MathUtils.clamp(
@@ -1143,7 +1173,15 @@ function animate() {
     coordinates.textContent =
         `X: ${player.position.x.toFixed(1)} | Z: ${player.position.z.toFixed(1)}`;
 
+    if (vehicleSystem.isDriving) {
+
+    vehicleSystem.updateInteractionButton();
+
+} else {
+
     world.updateInteractions(player);
+
+}
     renderer.render(scene, camera);
 
 }
