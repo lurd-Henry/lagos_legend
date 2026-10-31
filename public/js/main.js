@@ -4,6 +4,7 @@ import {
     createCharacter,
     updateCharacter
 } from "./character.js";
+import { WorldSystems } from "./worldSystems.js";
 
 // =====================================
 // LAGOS LEGENDS - STAGE 3.4 - 3.6
@@ -20,6 +21,7 @@ const WORLD_SIZE = 600;
 const WORLD_LIMIT = 265;
 
 const scene = new THREE.Scene();
+const world = new WorldSystems(scene);
 
 scene.background = new THREE.Color(0x9bcbd8);
 scene.fog = new THREE.Fog(0x9bcbd8, 120, 400);
@@ -270,6 +272,7 @@ function createCityBuilding(x, z, width, depth, height, color) {
 
     building.position.set(x, 0, z);
     scene.add(building);
+    world.addCollider(x, z, width, depth);
 }
 
 // =====================================
@@ -338,7 +341,10 @@ function createHouse(x, z, width, depth, color) {
 
     house.position.set(x, 0, z);
     scene.add(house);
+    house.position.set(x, 0, z);
+scene.add(house);
 
+world.addCollider(x, z, width, depth);
     return house;
 }
 
@@ -363,6 +369,12 @@ function createFence(x, z, width, depth) {
 
         mesh.position.set(px, h / 2, pz);
         fence.add(mesh);
+        world.addCollider(
+    x + px,
+    z + pz,
+    w,
+    d
+);
     }
 
     // Back and side walls.
@@ -491,6 +503,16 @@ function createKiosk(x, z, color) {
 
     kiosk.position.set(x, 0, z);
     scene.add(kiosk);
+    world.addCollider(x, z, 5.5, 4.5);
+
+world.addInteractable({
+    x,
+    z,
+    buttonText: "OPEN SHOP",
+    action: () => {
+        alert("Welcome! This shop will be available soon.");
+    }
+});
 }
 
 // =====================================
@@ -538,6 +560,16 @@ function createBusStop(x, z) {
 
     stop.position.set(x, 0, z);
     scene.add(stop);
+    world.addCollider(x, z, 8, 3);
+
+world.addInteractable({
+    x,
+    z,
+    buttonText: "BUS STOP",
+    action: () => {
+        alert("Public transport services coming soon!");
+    }
+});
 }
 
 // =====================================
@@ -925,7 +957,13 @@ renderer.domElement.addEventListener("contextmenu", event => {
 // =====================================
 
 const keys = {};
+window.addEventListener("keydown", event => {
 
+    if (event.key.toLowerCase() === "e") {
+        world.interact();
+    }
+
+});
 window.addEventListener("keydown", event => {
     keys[event.key.toLowerCase()] = true;
 });
@@ -1059,9 +1097,13 @@ function animate() {
             rightZ * direction.x +
             forwardZ * -direction.y;
 
-        player.position.x += worldX * speed * delta;
-        player.position.z += worldZ * speed * delta;
-
+        world.movePlayer(
+    player,
+    worldX,
+    worldZ,
+    speed,
+    delta
+);
         player.rotation.y = Math.atan2(worldX, worldZ);
 
     }
@@ -1090,6 +1132,7 @@ function animate() {
     coordinates.textContent =
         `X: ${player.position.x.toFixed(1)} | Z: ${player.position.z.toFixed(1)}`;
 
+    world.updateInteractions(player);
     renderer.render(scene, camera);
 
 }
