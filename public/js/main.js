@@ -340,12 +340,12 @@ function createHouse(x, z, width, depth, color) {
     house.add(tank);
 
     house.position.set(x, 0, z);
-    scene.add(house);
-    house.position.set(x, 0, z);
 scene.add(house);
 
 world.addCollider(x, z, width, depth);
-    return house;
+
+return house;
+
 }
 
 // =====================================
