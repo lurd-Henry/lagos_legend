@@ -694,12 +694,30 @@ function animate() {
 
     if (moving) {
 
-        player.position.x += direction.x * speed * delta;
-        player.position.z += direction.y * speed * delta;
+    // Calculate movement relative to camera direction
+    const forwardX = -Math.sin(cameraYaw);
+    const forwardZ = -Math.cos(cameraYaw);
 
-        player.rotation.y = Math.atan2(direction.x, direction.y);
+    const rightX = Math.cos(cameraYaw);
+    const rightZ = -Math.sin(cameraYaw);
 
-    }
+    // Convert joystick input into world direction
+    const worldX =
+        rightX * direction.x +
+        forwardX * -direction.y;
+
+    const worldZ =
+        rightZ * direction.x +
+        forwardZ * -direction.y;
+
+    // Move character
+    player.position.x += worldX * speed * delta;
+    player.position.z += worldZ * speed * delta;
+
+    // Rotate character towards movement direction
+    player.rotation.y = Math.atan2(worldX, worldZ);
+
+}
 
     player.userData.animate(
         clock.elapsedTime,
