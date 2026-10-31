@@ -422,9 +422,153 @@ document.getElementById("reset-button").addEventListener("click", () => {
 // CAMERA
 // =====================================
 
-camera.position.set(0, 6, 9);
-camera.lookAt(0, 1, 0);
+// =====================================
+// THIRD-PERSON CAMERA SYSTEM
+// =====================================
 
+let cameraYaw = 0;
+let cameraPitch = 0.25;
+
+const cameraDistance = 9;
+const cameraHeight = 2.5;
+
+let cameraTouchId = null;
+let lastTouchX = 0;
+let lastTouchY = 0;
+
+let mouseDown = false;
+let lastMouseX = 0;
+let lastMouseY = 0;
+
+const cameraSensitivity = 0.006;
+
+function updateCamera() {
+
+    const horizontalDistance =
+        cameraDistance * Math.cos(cameraPitch);
+
+    const cameraX =
+        player.position.x +
+        Math.sin(cameraYaw) * horizontalDistance;
+
+    const cameraZ =
+        player.position.z +
+        Math.cos(cameraYaw) * horizontalDistance;
+
+    const cameraY =
+        player.position.y +
+        cameraHeight +
+        cameraDistance * Math.sin(cameraPitch);
+
+    const targetPosition = new THREE.Vector3(
+        cameraX,
+        cameraY,
+        cameraZ
+    );
+
+    camera.position.lerp(targetPosition, 0.15);
+
+    camera.lookAt(
+        player.position.x,
+        player.position.y + 1.5,
+        player.position.z
+    );
+}
+// =====================================
+// MOBILE CAMERA TOUCH CONTROLS
+// =====================================
+
+renderer.domElement.addEventListener("pointerdown", event => {
+
+    // Ignore the left side: joystick owns movement.
+    if (event.clientX < window.innerWidth * 0.45) return;
+
+    if (cameraTouchId !== null) return;
+
+    cameraTouchId = event.pointerId;
+
+    lastTouchX = event.clientX;
+    lastTouchY = event.clientY;
+
+    renderer.domElement.setPointerCapture(event.pointerId);
+
+});
+
+renderer.domElement.addEventListener("pointermove", event => {
+
+    if (event.pointerId !== cameraTouchId) return;
+
+    const deltaX = event.clientX - lastTouchX;
+    const deltaY = event.clientY - lastTouchY;
+
+    cameraYaw -= deltaX * cameraSensitivity;
+
+    cameraPitch += deltaY * cameraSensitivity;
+
+    cameraPitch = THREE.MathUtils.clamp(
+        cameraPitch,
+        -0.35,
+        0.85
+    );
+
+    lastTouchX = event.clientX;
+    lastTouchY = event.clientY;
+
+});
+
+function releaseCameraTouch(event) {
+
+    if (event.pointerId === cameraTouchId) {
+        cameraTouchId = null;
+    }
+
+}
+
+renderer.domElement.addEventListener("pointerup", releaseCameraTouch);
+renderer.domElement.addEventListener("pointercancel", releaseCameraTouch);
+// =====================================
+// PC MOUSE CAMERA CONTROLS
+// =====================================
+
+renderer.domElement.addEventListener("mousedown", event => {
+
+    if (event.button !== 2) return;
+
+    mouseDown = true;
+
+    lastMouseX = event.clientX;
+    lastMouseY = event.clientY;
+
+});
+
+window.addEventListener("mouseup", () => {
+    mouseDown = false;
+});
+
+window.addEventListener("mousemove", event => {
+
+    if (!mouseDown) return;
+
+    const deltaX = event.clientX - lastMouseX;
+    const deltaY = event.clientY - lastMouseY;
+
+    cameraYaw -= deltaX * cameraSensitivity;
+    cameraPitch += deltaY * cameraSensitivity;
+
+    cameraPitch = THREE.MathUtils.clamp(
+        cameraPitch,
+        -0.35,
+        0.85
+    );
+
+    lastMouseX = event.clientX;
+    lastMouseY = event.clientY;
+
+});
+
+renderer.domElement.addEventListener("contextmenu", event => {
+    event.preventDefault();
+});
 // =====================================
 // KEYBOARD CONTROLS
 // =====================================
@@ -564,20 +708,7 @@ function animate() {
     );
 
     // Camera follows player
-    const target = new THREE.Vector3(
-        player.position.x,
-        player.position.y + 5.5,
-        player.position.z + 8
-    );
-
-    camera.position.lerp(target, 0.08);
-
-    camera.lookAt(
-        player.position.x,
-        player.position.y + 1,
-        player.position.z
-    );
-
+    updateCamera();
     coordinates.textContent =
         `X: ${player.position.x.toFixed(1)} | Z: ${player.position.z.toFixed(1)}`;
 
